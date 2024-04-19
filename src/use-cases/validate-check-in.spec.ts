@@ -11,13 +11,11 @@ describe("Validate Check-in Use Case", () => {
     checkInsRepository = new InMemoryCheckInsRepository();
     sut = new ValidateCheckInUseCase(checkInsRepository);
 
-    // vi.useFakeTimers();
-    // Antes de cada teste criamos o mock - datas ficticias
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    // vi.useRealTimers();
-    //resetamos para a data real
+    vi.useRealTimers();
   });
 
   it("Should be able to validate the check-in", async () => {
@@ -40,5 +38,24 @@ describe("Validate Check-in Use Case", () => {
         checkInId: "inexistent-check-id",
       })
     ).rejects.toBeInstanceOf(ResourceNotFoundError);
+  });
+
+  it("Should not be able to validate the check-in after 20 minutes of ites creation", async () => {
+    vi.setSystemTime(new Date(2023, 0, 1, 13, 40));
+
+    const createdCheckIn = await checkInsRepository.create({
+      gym_id: "gym-01",
+      user_id: "user-01",
+    });
+
+    const twentyOneMinutesInMs = 1000 * 60 * 21;
+
+    vi.advanceTimersByTime(twentyOneMinutesInMs);
+
+    await expect(() =>
+      sut.execute({
+        checkInId: createdCheckIn.id,
+      })
+    ).rejects.toBeInstanceOf(Error);
   });
 });
