@@ -24,7 +24,9 @@ export async function authenticate(
 
     // NUNCA COLOCAR SENHA DO USUÁRIO DENTRO DO PAYLOAD, POIS ELE NÃO É CRIPTOGRAFADO. Nunca colocar informações sensíveis do usuário
     const token = await reply.jwtSign(
-      {},
+      {
+        role: user.role,
+      },
       {
         sign: {
           sub: user.id,
@@ -33,7 +35,9 @@ export async function authenticate(
     );
 
     const refreshToken = await reply.jwtSign(
-      {},
+      {
+        role: user.role,
+      },
       {
         sign: {
           sub: user.id,
